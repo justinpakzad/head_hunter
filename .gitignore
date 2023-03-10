@@ -1,4 +1,4 @@
 .env
 .python-version
 head_hunter/raw_data
-.h5
+*.h5
