@@ -118,7 +118,7 @@ st.markdown("---")
 rf = Roboflow(api_key=st.secrets['api_key'])
 
 project = rf.workspace().project('crowd_counting')
-model = project.version(8).model
+model = project.version(12).model
 
 folder_names = []
 folders = []
@@ -150,57 +150,25 @@ def load_images(crowd_size):
         session_state.random_paths = random.sample(image_paths, k=1)
 
     for path in session_state.random_paths:
-        #image = cv2.imread(path)
-        #random_path = random.choice(image_paths)
+        # Load the image
+        image = cv2.imread(path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        # Open image and convert it to sRGB color space
-        pil_image = Image.open(path).convert("RGB")
+        st.image(image)
 
-        st.image(pil_image)
-
-        st.write("Here's the good stuff:")
-        ###
-        buffered = io.BytesIO()
-        pil_image.save(buffered, quality=90, format='JPEG')
-        img_str = base64.b64encode(buffered.getvalue())
-        img_str = img_str.decode('ascii')
-
-        upload_url = ''.join([
-            'https://detect.roboflow.com/crowd_counting/12',
-            f'?access_token={st.secrets["api_key"]}',
-            '&format=image',
-            f'&overlap={overlap_threshold * 100}',
-            f'&confidence={confidence_threshold * 100}',
-            '&stroke=2',
-            '&labels=True'
-        ])
-
-        r = requests.post(upload_url,
-                        data=img_str,
-                        headers={
-            'Content-Type': 'application/x-www-form-urlencoded'
-        })
-
-        image = Image.open(io.BytesIO(r.content))
-
-        # Convert to JPEG Buffer.
-        buffered = io.BytesIO()
-        image.save(buffered, quality=90, format='JPEG')
-
-        # Display image.
-        st.image(image, use_column_width=True)
-
-        ###
-
-
-
+        # Run the prediction on the image
         robo_prediction = model.predict(path, confidence=confidence_threshold*100, overlap=overlap_threshold*100).json()
 
-        st.write(len(robo_prediction["predictions"]))
+        # Draw the bounding boxes on the image
+        for prediction in robo_prediction['predictions']:
+            x, y, w, h = map(int, [prediction['x'], prediction['y'], prediction['width'], prediction['height']])
+            cv2.rectangle(image, (x, y), (x+w, y+h), (0, 255, 0), 2)
 
+        # Convert the image from BGR to RGB and display it
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        st.image(image, caption="Image with detection boxes")
 
-
-        st.image()
+        st.write(len(robo_prediction['predictions']))
 
 load_images(selected_folder)
 
@@ -226,3 +194,6 @@ if img_file_buffer is not None:
     st.image(Image.open(img_file_buffer), caption='')
 
     st.write(f"Our count is {result}. 😈")
+
+
+#temp
