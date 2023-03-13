@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw,ImageFont
 import requests
 import os
 import glob
@@ -18,19 +18,17 @@ url = 'https://detect.roboflow.com/crowd_counting/12'
 
 rf = Roboflow(api_key=st.secrets['api_key'])
 project = rf.workspace().project('crowd_counting')
-model = project.version(12).model
-
+model = project.version(14).model
 
 
 
 def load_images(cv_image, confidence_threshold, overlap_threshold):
     # Make prediction using Roboflow API
     robo_prediction = model.predict(cv_image, confidence=confidence_threshold*100, overlap=overlap_threshold*100).json()
-
-    st.write(f'Our system detects {len(robo_prediction["predictions"])} humans')
-
+    st.write(f'Our system detects {len(robo_prediction["predictions"])} humans in this photo')
     pil_img_with_boxes = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(pil_img_with_boxes)
+
     for prediction in robo_prediction['predictions']:
         label = prediction['class']
         xmin = prediction['x']
@@ -41,9 +39,9 @@ def load_images(cv_image, confidence_threshold, overlap_threshold):
         top_ly = ymin + prediction['height'] /2
         bottom_lx = xmin - prediction['width'] /2
         bottom_ly = ymin - prediction['height'] /2
-        draw.rectangle(((top_lx, top_ly), (bottom_lx, bottom_ly)), outline='blue', width=5)
-        draw.point((xmin, ymin),'blue')
-    st.image(pil_img_with_boxes, caption='Image with bounding boxes')
+        draw.rectangle(((top_lx, top_ly), (bottom_lx, bottom_ly)), outline='red', width=4)
+        draw.text((bottom_lx, bottom_ly), label, fill='white')
+    st.image(pil_img_with_boxes)
 
 
 def main():
@@ -55,46 +53,28 @@ def main():
     folders = [os.path.basename(path) for path in glob.glob('/Users/User/code/denesito/justin/roboflow_images/*') if os.path.isdir(path)]
     confidence_threshold = st.sidebar.slider('Confidence threshold:', 0.0, 1.0, 0.3, 0.01)
     overlap_threshold = st.sidebar.slider('Overlap threshold:', 0.0, 1.0, 0.5, 0.01)
-    selected_folder = st.sidebar.selectbox('What size crowd do you wanna see?', folders)
 
 
     img_file_buffer = st.file_uploader('')
+
+    # st.button("Predict Please....")
     if img_file_buffer is not None:
         img_bytes = img_file_buffer.getvalue()
-
         # Load uploaded image
         pil_image = Image.open(io.BytesIO(img_bytes))
         cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-        # st.image(pil_image)
 
-
-        with st.spinner('Detecting Humans......'):
-            time.sleep(10)
-        r = load_images(cv_image, confidence_threshold, overlap_threshold)
-
-        pil_image = Image.open(io.BytesIO(r.content))
-        cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-
-        st.image(cv_image, caption='Image with bounding boxes')
-
-    else:
-        image_paths = glob.glob(f'/Users/User/code/denesito/justin/roboflow_images/{selected_folder}/*.*')
-        random_path = random.choice(image_paths)
-
-        cv_image = cv2.imread(random_path)
-
-
-        pil_image = Image.fromarray(cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB))
         st.image(pil_image)
+        if st.button("Predict Please...."):
+            with st.spinner('Detecting Humans......'):
+                time.sleep(10)
+            load_images(cv_image, confidence_threshold, overlap_threshold)
 
-        with st.spinner('Detecting Humans......'):
-            time.sleep(10)
-        r = load_images(cv_image, confidence_threshold, overlap_threshold)
+        # pil_image = Image.open(io.BytesIO(r.content))
+        # cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
-        pil_image = Image.open(io.BytesIO(r.content))
-        cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
+        # st.image(cv_image, caption='Image with bounding boxes')
 
-        st.image(cv_image, caption='Image with bounding boxes')
 
 if __name__ == '__main__':
     main()
