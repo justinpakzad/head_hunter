@@ -1,3 +1,4 @@
 .env
 .python-version
 head_hunter/raw_data
+website_hh/.streamlit
