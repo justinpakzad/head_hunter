@@ -35,6 +35,17 @@ def load_images(cv_image, confidence_threshold, overlap_threshold):
 
     st.write(f'Our system detects {len(robo_prediction["predictions"])} humans')
 
+    for prediction in robo_prediction['predictions']:
+        label = prediction['class']
+        x = prediction['x']
+        y = prediction['y']
+        # xmax = xmin + prediction['width']
+        # ymax = ymin + prediction['height']
+        # draw.rectangle(((xmin, ymin), (xmax, ymax)), outline='red', width=3)
+        # draw.text((xmin, ymin), label, fill='red')
+        draw.text((x,y),'red')
+    st.image(pil_img_with_boxes, caption='Image with bounding boxes')
+
     ## Construct the URL to retrieve image.
     upload_url = f'https://detect.roboflow.com/crowd_counting/12?api_key={st.secrets["api_key"]}&confidence={confidence_threshold}&{overlap_threshold}=&format=image&labels=off'
 
