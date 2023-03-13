@@ -50,14 +50,13 @@ def main():
     st.markdown("---")
 
 
-    folders = [os.path.basename(path) for path in glob.glob('/Users/User/code/denesito/justin/roboflow_images/*') if os.path.isdir(path)]
     confidence_threshold = st.sidebar.slider('Confidence threshold:', 0.0, 1.0, 0.3, 0.01)
     overlap_threshold = st.sidebar.slider('Overlap threshold:', 0.0, 1.0, 0.5, 0.01)
 
 
     img_file_buffer = st.file_uploader('')
 
-    # st.button("Predict Please....")
+
     if img_file_buffer is not None:
         img_bytes = img_file_buffer.getvalue()
         # Load uploaded image
