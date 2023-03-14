@@ -16,3 +16,4 @@ psycopg2-binary
 fastapi==0.70.1
 pytz
 httpx
+
