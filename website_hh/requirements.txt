@@ -1,19 +1,9 @@
-# pip>=9
-setuptools>=26
-twine
-wheel>=0.29
 numpy
-fastapi
-uvicorn
-opencv-python
+opencv-python-headless
 pandas
-google-cloud-bigquery
-google-cloud-storage
 db-dtypes
 pyarrow
 python-multipart
 psycopg2-binary
-# fastapi==0.70.1
-pytz
 httpx
 roboflow
