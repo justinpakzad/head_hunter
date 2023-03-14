@@ -1,4 +1,4 @@
-pip>=9
+# pip>=9
 setuptools>=26
 twine
 wheel>=0.29
@@ -13,7 +13,7 @@ db-dtypes
 pyarrow
 python-multipart
 psycopg2-binary
-fastapi==0.70.1
+# fastapi==0.70.1
 pytz
 httpx
 roboflow
